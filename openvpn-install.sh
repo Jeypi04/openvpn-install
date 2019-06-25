@@ -51,9 +51,6 @@ newclient () {
 	echo "<key>" >> ~/$1.ovpn
 	cat /etc/openvpn/server/easy-rsa/pki/private/$1.key >> ~/$1.ovpn
 	echo "</key>" >> ~/$1.ovpn
-	echo "<tls-auth>" >> ~/$1.ovpn
-	sed -ne '/BEGIN OpenVPN Static key/,$ p' /etc/openvpn/server/ta.key >> ~/$1.ovpn
-	echo "</tls-auth>" >> ~/$1.ovpn
 }
 
 if [[ -e /etc/openvpn/server/server.conf ]]; then
@@ -183,9 +180,9 @@ else
 	fi
 	echo
 	echo "Which protocol do you want for OpenVPN connections?"
-	echo "   1) UDP (recommended)"
-	echo "   2) TCP"
-	read -p "Protocol [1-2]: " -e -i 1 PROTOCOL
+	echo "   1) UDP"
+	echo "   2) TCP (recommended)"
+	read -p "Protocol [1-2]: " -e -i 2 PROTOCOL
 	case $PROTOCOL in
 		1) 
 		PROTOCOL=udp
@@ -260,8 +257,7 @@ ca ca.crt
 cert server.crt
 key server.key
 dh dh.pem
-auth SHA512
-tls-auth ta.key 0
+auth none
 topology subnet
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt" > /etc/openvpn/server/server.conf
@@ -299,7 +295,7 @@ ifconfig-pool-persist ipp.txt" > /etc/openvpn/server/server.conf
 		;;
 	esac
 	echo "keepalive 10 120
-cipher AES-256-CBC
+cipher none
 user nobody
 group $GROUPNAME
 persist-key
@@ -372,8 +368,8 @@ nobind
 persist-key
 persist-tun
 remote-cert-tls server
-auth SHA512
-cipher AES-256-CBC
+auth none
+cipher none
 setenv opt block-outside-dns
 key-direction 1
 verb 3" > /etc/openvpn/server/client-common.txt
